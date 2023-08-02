@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Date Prediction Form</title>
+</head>
+<body>
+    <h1>Predict Date</h1>
+    <form action="{{ url_for('get_predicted_date') }}"  method="post">
+        <label for="delay">Delay (integer):</label>
+        <input type="number" id="delay" name="delay" required>
+        <br>
+        <label for="due_date">Due Date (YYYYMMDD):</label>
+        <input type="text" id="due_date" name="due_date" required>
+        <br>
+        <input type="submit" value="Predict">
+    </form>
+    <br>
+    {% if result %}
+        <h2>Prediction Result:</h2>
+        <p>Predicted Date: {{ result }}</p>
+    {% endif %}
+</body>
+</html>

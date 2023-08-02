@@ -1,35 +1,38 @@
-# app.py
+from flask import Flask, request, jsonify, render_template
 import pickle
 import pandas as pd
-from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Load the pickled model
+# Load the ML model from 'model.pkl'
 with open('model.pkl', 'rb') as file:
     model = pickle.load(file)
 
-@app.route('/predict', methods=['POST'])
-def predict():
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/predict_date', methods=['POST'])
+def get_predicted_date():
     try:
-        # Get data from the request
-        data = request.json
+        delay = int(request.form['delay'])  
+        due_date_str = request.form['due_in_date']
 
-        # Convert data to DataFrame
-        test_data = pd.DataFrame(data)
+        due_date = pd.to_datetime(due_date_str, format="%Y%m%d")
 
-        # Perform the same calculations as before to get the predicted_date
-        test_data['predicted_date'] = pd.to_timedelta(test_data['delay'], unit="D") + pd.to_datetime(test_data['due_in_date'], format="%Y%m%d")
+        predicted_date = model.predict(delay, due_date)
 
-        # Make predictions using the loaded model
-        predictions = model.predict(test_data)
+        predicted_date_str = predicted_date.strftime("%Y-%m-%d")
 
-        # Return the predictions as a JSON response
-        result = {'predicted_date': predictions.tolist()}
-        return jsonify(result)
+        response = {
+            'predicted_date': predicted_date_str
+        }
+
+        return render_template('index.html', result=response['predicted_date'])
 
     except Exception as e:
-        return jsonify({'error': str(e)})
+        print("Error:", e)  
+        return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
